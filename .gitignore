@@ -27,3 +27,6 @@ venv.bak/
 
 # Source data too big, can be downloaded
 source/*.bsp
+
+# Result data do not retain
+result/*
