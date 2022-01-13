@@ -1,25 +1,53 @@
 """This file is for testing purposes
 Usage: just run for now
 """
-
-from calendar import monthrange
 import pandas as pd
-from skyfield.api import load, Topos
+from skyfield.api import load, Topos, utc
 from skyfield import timelib
 import sqlite3
 
-def format_time(ts_object):
-    if not isinstance(ts_object, timelib.Time):
-        return
-    else:
-        return ts_object.utc_strftime('%Y-%m-%d %H:%M')
 
-def listed_val(time_val, observation):
-    return [time_val, observation.radec()[1].degrees, observation.radec()[-1].au]
+class Computation:
+    def __init__(self, c, o):
+        self.centerpoint = c
+        self.observed = o
+        self.c = c
+        self.ts = load.timescale()
+
+    def shift(self, x=0, y=0):
+        if pd.isna(x) and pd.isna(y):
+            self.centerpoint = self.c
+        else:
+            self.centerpoint = self.c + Topos(f'{x} N', f'{y} E')
+
+
+def format_time(ts_object):
+    if isinstance(ts_object, timelib.Time):
+        return ts_object.utc_strftime('%Y-%m-%d %H:%M')
+    elif isinstance(ts_object, pd.Timestamp):
+        return sel.ts.utc(ts_object.year, ts_object.month, ts_object.day, ts_object.hour, ts_object.minute)
+    else:
+        return 
+
+def degrees(t):
+    # %t%: timestamp value
+    return sel.centerpoint.at(format_time(t)).observe(sel.observed).radec()[1].degrees
+
+def distance(t):
+    # %t%: timestamp value
+    return sel.centerpoint.at(format_time(t)).observe(sel.observed).radec()[-1].au
     
-def observer(c, start, end, gran):
+def frequency(day=0, hour=0, minute=0):
+    if minute:
+        return f'{minute}min'
+    elif hour:
+        return f'{60*hour}min'
+    elif day:
+        return f'{1440*day}min' # 1 day timestep
+
+def observer(start, end, gran):
     """iteration that computes values for given parameters
-    %c%: center point position (with Topos module)
+    %c%: center point position (with Topos module or another) 
     %start%: start date (pandas dataframe row)
     %end%: end date (pandas dataframe row)
     %gran%: granularity (pandas dataframe row)
@@ -27,28 +55,18 @@ def observer(c, start, end, gran):
     """
     if not isinstance(start, pd.DataFrame) or not isinstance(end, pd.DataFrame) or not isinstance(gran, pd.DataFrame):
         return
-    ts = load.timescale()
-    data = []
     print(f"""      from {start.Day.iloc[0]}/{start.Month.iloc[0]}/{start.Year.iloc[0]} 
         to {end.Day.iloc[0]}/{end.Month.iloc[0]}/{end.Year.iloc[0]} 
         at time step {gran.Day.iloc[0]} days {gran.Hour.iloc[0]} hours {gran.Minute.iloc[0]} minutes""")
-    for year in range(start.Year.iloc[0], end.Year.iloc[0]+1):
-        for month in range(start.Month.iloc[0], end.Month.iloc[0]+1):
-            day_finish = monthrange(year, month)[1]  # or end.Day.iloc[0]
-            for day in range(start.Day.iloc[0], day_finish + 1):
-                if gran.Hour.iloc[0] or gran.Minute.iloc[0]:
-                    for hour in range(1, 25):
-                        if gran.Minute.iloc[0]:
-                            for minute in range(1, 61):
-                                t = ts.utc(year, month, day, hour, minute)
-                                data.append(listed_val(format_time(t), c.at(t).observe(moon)))
-                        else:  # case hourly reporting at 0 minutes 
-                            t = ts.utc(year, month, day, hour)
-                            data.append(listed_val(format_time(t), c.at(t).observe(moon)))
-                else:  # case daily reporting at 12:00 every day
-                    t = ts.utc(year, month, day, 12)
-                    data.append(listed_val(format_time(t), c.at(t).observe(moon)))
-    return pd.DataFrame(data, columns=['date_time', 'declination', 'distance'])
+    time_span = pd.date_range(f'{start.Month.iloc[0]}/{start.Day.iloc[0]}/{start.Year.iloc[0]}',
+                             f'{end.Month.iloc[0]}/{end.Day.iloc[0]}/{end.Year.iloc[0]}',
+                             freq=frequency(gran.Day.iloc[0], gran.Hour.iloc[0], gran.Minute.iloc[0]))
+    
+    obs = pd.DataFrame(time_span, columns=['date_time'])
+    obs['declination'] = obs['date_time'].apply(degrees)
+    obs['distance'] = obs['date_time'].apply(distance)
+    
+    return obs
 
 
 if __name__ == '__main__':
@@ -58,18 +76,17 @@ if __name__ == '__main__':
     labels = variants[variants.columns[[2,3,4]]].apply(lambda x: f'{list(x)[0]} ({list(x)[1]} / {list(x)[2]})', 1).tolist()
 
     planets = load('./source/de430.bsp')
-    moon = planets['moon']  # observed point
+    sel = Computation(planets['earth'], planets['moon'])
+    
+    start_point = time_period['Param'] == 'start_point'
+    end_point = time_period['Param'] == 'end_point'
+    granularity = time_period['Param'] == 'granularity'
     
     for idx, var in variants.iterrows():
-        if pd.isna(var[3]):
-            earth = planets['earth']
-        else:
-            earth = planets['earth'] + Topos(f'{var[3]} N', f'{var[4]} E')
+        if not pd.isna(var[3]):
+            sel.shift(var[3], var[4])
         print(f'computing variant {var[1]} {labels[idx]}')
-        start_point = time_period[time_period['Param'] == 'start_point']
-        end_point = time_period[time_period['Param'] == 'end_point']
-        granularity = time_period[time_period['Param'] == 'granularity']
-        o = observer(earth, start_point, end_point, granularity)
+        o = observer(time_period[start_point], time_period[end_point], time_period[granularity])
         print(f'      output to file ./result/{var[-1]}')
         o.to_csv('./result/'+var[-1], index=False, mode='w')
         
