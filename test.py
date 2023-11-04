@@ -1,13 +1,99 @@
 """This file is for testing purposes
 Usage: just run for now
 """
+from datetime import timedelta
 import pandas as pd
 from skyfield.api import load, Topos, utc
 from skyfield import timelib
 import sqlite3
 
+class Master:
+    def __init__(self, source_file: str="./source/de430.bsp", located: str="", format="'%Y-%m-%d %H:%M'"):
+        self.planets = load(source_file)
+        self.available = {0: "solar", 1: "mercury", 2: "venus", 3: "earth", 4: "mars",
+                          5: "jupiter", 6: "saturn", 7: "uran", 8: "neptune", 9: "pluto", 
+                          10: "sun", 199: "mercury", 299: "venus", 301: "moon", 399: "earth"}
+        self.head = {
+            "location": self.move_head_location(planet=located),
+            "direction": ["planets", "list", "to be", "observed"],
+            "compute": ["declination", "distance"]
+        }
+        self.time = {
+            "scale": load.timescale(),
+            "from": 0,
+            "to": 0,
+            "gran": 0,
+            "format": format,
+            "frame" : None  # this will hold pandas time frame
+        }
+    
+    def move_head_location(self, x: int=0, y: int=0, planet=""):
+        # very simplified shifting function
+        if planet:
+            return self.planets[planet]
+        elif pd.isna(x) and pd.isna(y):
+            return self.planets['earth']  # default one
+        else:
+            return self.planets['earth'] + Topos(f'{x} N', f'{y} E')
+    
+    def move_head_direction(self, *args):
+        self.head["direction"] = [obj for obj in args if obj in self.available.values()]
+    
+    def frame_the_time(self, what: str="", year: int=0, month: int=0, day: int=0, hour: int=0, minute: int=0):
+        if not what:  # hardcoded current month with daily granularity
+            self.time["from"] = self.time["scale"].now().utc_strftime()
+            self.time["to"] = (self.time["scale"].now() + timedelta(days=1*30)).utc_strftime()
+            self.time["gran"] = frequency(day=1)
+            self.time["frame"] = self.frame_prepare()
+        elif what == "gran":
+            self.time["gran"] = frequency(year, month, day)
+        elif what in ("from", "to"):
+            self.time[what] = self.time["scale"].utc(year, month, day, hour, minute).utc_strftime()
+        elif what == "frame":
+            self.time["frame"] = self.frame_prepare()
+        else:
+            print("not known method...")
+
+    def frame_prepare(self):
+        df = pd.DataFrame(
+            pd.date_range(
+                self.time["from"], self.time["to"], 
+                freq=self.time["gran"]
+            ),
+            columns=['date_time']
+        )
+        for planet in self.head["direction"]:
+            for computation in self.head["compute"]:
+                if computation == "distance":
+                    df[f"{planet}_distance"] = df['date_time'].apply(self.distance, args=(planet, ))
+                elif "dec" in computation:
+                    df[f"{planet}_declination"] = df['date_time'].apply(self.degrees, args=(planet, ))
+        return df
+    
+    def degrees(self, t, target):
+        # %t%: timestamp value
+        return self.head["location"].at(self.format_time(t)).observe(self.id(target)).radec()[1].degrees
+
+    def distance(self, t, target):
+        # %t%: timestamp value
+        return self.head["location"].at(self.format_time(t)).observe(self.id(target)).radec()[-1].au
+    
+    def id(self, planet_name):
+        for key, val in self.available.items():
+            if val == planet_name:
+                return self.planets[key]
+
+    def format_time(self, ts_object):
+        if isinstance(ts_object, timelib.Time):
+            return ts_object.utc_strftime('%Y-%m-%d %H:%M')
+        elif isinstance(ts_object, pd.Timestamp):
+            return self.time["scale"].utc(ts_object.year, ts_object.month, ts_object.day, ts_object.hour, ts_object.minute)
+        else:
+            return ts_object  # no change
+
 
 class Computation:
+    
     def __init__(self, c, o):
         self.centerpoint = c
         self.observed = o
@@ -21,13 +107,7 @@ class Computation:
             self.centerpoint = self.c + Topos(f'{x} N', f'{y} E')
 
 
-def format_time(ts_object):
-    if isinstance(ts_object, timelib.Time):
-        return ts_object.utc_strftime('%Y-%m-%d %H:%M')
-    elif isinstance(ts_object, pd.Timestamp):
-        return sel.ts.utc(ts_object.year, ts_object.month, ts_object.day, ts_object.hour, ts_object.minute)
-    else:
-        return 
+
 
 def degrees(t):
     # %t%: timestamp value
@@ -43,7 +123,7 @@ def frequency(day=0, hour=0, minute=0):
     elif hour:
         return f'{60*hour}min'
     elif day:
-        return f'{1440*day}min' # 1 day timestep
+        return f'{1440*day}min' # x day timestep
 
 def observer(start, end, gran):
     """iteration that computes values for given parameters
@@ -68,14 +148,16 @@ def observer(start, end, gran):
     
     return obs
 
+def load_db_setup(location="./settings.db", table="TimePeriod"):
+    with sqlite3.connect(location) as db_connection:
+        return pd.read_sql(f"SELECT * FROM {table};", db_connection)
 
-if __name__ == '__main__':
-    db_connection = sqlite3.connect("./settings.db")
-    variants = pd.read_sql("select * from ComputeVariants", db_connection)
-    time_period = pd.read_sql("select * from TimePeriod", db_connection)
+def generate_result_files():
+    variants = load_db_setup(table="ComputeVariants")
+    time_period = load_db_setup(table="TimePeriod")
     labels = variants[variants.columns[[2,3,4]]].apply(lambda x: f'{list(x)[0]} ({list(x)[1]} / {list(x)[2]})', 1).tolist()
 
-    planets = load('./source/de430.bsp')
+    
     sel = Computation(planets['earth'], planets['moon'])
     
     start_point = time_period['Param'] == 'start_point'
@@ -89,5 +171,20 @@ if __name__ == '__main__':
         o = observer(time_period[start_point], time_period[end_point], time_period[granularity])
         print(f'      output to file ./result/{var[-1]}')
         o.to_csv('./result/'+var[-1], index=False, mode='w')
+
+
+if __name__ == '__main__':
+    observer = Master()
+    
+    submit_args = False
+    if submit_args:
+        generate_result_files()
+    else:
+        observer.move_head_direction("moon", "pluto")
+        print("Sitting in", str(observer.head["location"]), 
+              "\nLooking at", observer.head["direction"],
+              "\nComputing", observer.head["compute"])
+        observer.frame_the_time()
+        print(observer.time["frame"])
         
     

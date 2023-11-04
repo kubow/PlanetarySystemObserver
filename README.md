@@ -1,27 +1,34 @@
 # PlanetarySystemObserver
 
-Layout for observing planetary system object positions using [JPL Horizon](https://en.wikipedia.org/wiki/JPL_Horizons_On-Line_Ephemeris_System) data.
+Layout for observing planetary system object positions using various [[sources]] data.
 
-## prerequisities
+The second part is about representation these positions as [[zodiac|zodiacal position]].
 
-- python3
-- python jupyter notebook package
+## How to use
 
-The rest is covered in jupyter notebooks.
+- ensure you have [python3](https://www.python.org/downloads/) installed
+- clone the workspace
 
-```
+```shell
 git clone https://github.com/kubow/PlanetarySystemObserver
 cd PlanetarySystemObserver
-# variants
-# 1.
-jupyter notebook
-# 2.
-streamlit
-
 ```
 
-## source data
+- preferably use a virtual environment
 
-Visit [discussion on astronomy stack exchange](https://astronomy.stackexchange.com/questions/13488/where-can-i-find-the-positions-of-the-planets-stars-moons-artificial-satellit) to have broader overview of possible sources of space objects data positions.
+```shell
+python -m venv venv  # init directory
+source venv/bin/activate  # activate environment
+```
 
-This layout computes position of space objects using SPK files (SPICE Kernel) that matches closely to JPL HORIZON. Source files are generally available on [NASA Planetary Data System archive](https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/).
+- install requirements and run variants
+
+```shell
+pip install -r requirements.txt  # install dependencies
+# basic run (command line experience)
+python main.py
+# alternatives
+jupyter notebook  # duplicated code with description
+streamlit run your_script.py  # web application
+python -m streamlit run your_script.py
+```
