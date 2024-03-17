@@ -8,27 +8,21 @@ The second part is about representation these positions as [[zodiac|zodiacal pos
 
 - ensure you have [python3](https://www.python.org/downloads/) installed
 - clone the workspace
+- work in a virtual environment
 
 ```shell
-git clone https://github.com/kubow/PlanetarySystemObserver
-cd PlanetarySystemObserver
-```
-
-- preferably use a virtual environment
-
-```shell
-python -m venv venv  # init directory
-source venv/bin/activate  # activate environment
-```
-
-- install requirements and run variants
-
-```shell
+python -m venv planetary  # init directory
+source planetary/bin/activate  # activate environment
 pip install -r requirements.txt  # install dependencies
+```
+
+- run the code
+
+```shell
 # basic run (command line experience)
-python main.py
+python observer
 # alternatives
 jupyter notebook  # duplicated code with description
-streamlit run your_script.py  # web application
-python -m streamlit run your_script.py
+streamlit run observer/ui_streamlit.py  # web application
+python -m streamlit run observer/ui_streamlit.py
 ```
