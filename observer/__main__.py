@@ -1,36 +1,37 @@
 import argparse
-from display import display_radial, display_3d
+# from display import display_radial, display_3d
 from pathlib import Path
-import sys
+from sys import argv, exit
 
 def create_dir(location):
     try:
         Path(location).mkdir(parents=True, exist_ok=False)
     except FileExistsError:
-        print(f"Folder {location} is already there")
+        print(f"Folder {location} is already present")
     else:
         print(f"Folder {location} was created")
 
+def download_file(location, file_name=""):
+    # https://stackoverflow.com/questions/11768214/python-download-a-file-from-an-ftp-server
+    import shutil
+    import urllib.request as request
+    from contextlib import closing
+
+    bsp_location = f"https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/{file_name}"
+
+    with closing(request.urlopen(bsp_location)) as r:
+        with open(f"./{location}/{file_name}", "wb") as f:
+            shutil.copyfileobj(r, f)
+    print(f"SPK file ./{location}/{file_name} downloaded ....")
 
 def get_source_file(location: str = "source", file_name="de430.bsp"):
-    path = Path(f"./{location}/{file_name}")
-    if path.is_file():
+    if Path(f"./{location}/{file_name}").is_file():
         print(f"SPK file ./{location}/{file_name} exists...")
     else:
         print(
             f"SPK file ./{location}/{file_name} downloading, wait some time please..."
         )
-        # https://stackoverflow.com/questions/11768214/python-download-a-file-from-an-ftp-server
-        import shutil
-        import urllib.request as request
-        from contextlib import closing
-
-        bsp_location = f"https://naif.jpl.nasa.gov/pub/naif/generic_kernels/spk/planets/{file_name}"
-
-        with closing(request.urlopen(bsp_location)) as r:
-            with open(f"./{location}/{file_name}", "wb") as f:
-                shutil.copyfileobj(r, f)
-        print(f"SPK file ./{location}/{file_name} downloaded ....")
+        download_file(location, file_name)
 
 
 if __name__ == "__main__":
@@ -41,8 +42,8 @@ if __name__ == "__main__":
         # from streamlit import cli as stcli
         try:
             from streamlit.web import cli as stcli    
-            sys.argv = ["streamlit", "run", "./smrk/ui_streamlit.py"]
-            sys.exit(stcli.main())
+            argv = ["streamlit", "run", "./observer/ui_streamlit.py"]
+            exit(stcli.main())
         except ImportError:
             import ui_streamlit as st
             print("What?")
