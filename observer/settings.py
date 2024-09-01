@@ -1,21 +1,63 @@
-import pandas as pd
-import sqlite3
-from pathlib import Path
-
-
+# pure settings purposes
 def change_language(default: str = "cz") -> dict:
-    return {
-        "position": "Zadejte pozici",
-        "timespan": "Zadejte časové rozmezí",
-        "control": "potvrdit",
-        "latitude": "zeměpisná šířka",
-        "longitude": "zeměpisná délka",
-        "date_from": "počátěční čas",
-        "date_to": "koncový čas",
-        "run": "spustit výpočet"
-    }
+    if default == 'en':
+        return {
+            "position": "Enter position",
+            "timespan": "Enter timespan",
+            "control": "confirm",
+            "latitude": "latitude",
+            "longitude": "longitude",
+            "date_from": "start time",
+            "date_to": "end time",
+            "run": "run calculation"
+        }
+    elif default == 'de':
+        return {
+            "position": "Position eingeben",
+            "timespan": "Zeitraum eingeben",
+            "control": "bestätigen",
+            "latitude": "Breitengrad",
+            "longitude": "Längengrad",
+            "date_from": "Startzeit",
+            "date_to": "Endzeit",
+            "run": "Berechnung ausführen"
+        }
+    elif default == 'es':
+        return {
+            "position": "Ingrese posición",
+            "timespan": "Ingrese rango de tiempo",
+            "control": "confirmar",
+            "latitude": "latitud",
+            "longitude": "longitud",
+            "date_from": "hora de inicio",
+            "date_to": "hora de fin",
+            "run": "ejecutar cálculo"
+        }
+    elif default == 'fr':
+        return {
+            "position": "Entrez la position",
+            "timespan": "Entrez la période",
+            "control": "confirmer",
+            "latitude": "latitude",
+            "longitude": "longitude",
+            "date_from": "heure de début",
+            "date_to": "heure de fin",
+            "run": "lancer le calcul"
+        }
+    else:
+        return {
+            "position": "Zadejte pozici",
+            "timespan": "Zadejte časové rozmezí",
+            "control": "potvrdit",
+            "latitude": "zeměpisná šířka",
+            "longitude": "zeměpisná délka",
+            "date_from": "počátěční čas",
+            "date_to": "koncový čas",
+            "run": "spustit výpočet"
+        }
 
 
 if __name__ == "__main__":
+    # simple dummy test
     t = change_language("cz")
     # print(t["display"])
