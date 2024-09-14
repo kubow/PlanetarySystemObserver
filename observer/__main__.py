@@ -3,6 +3,14 @@ import argparse
 from pathlib import Path
 from sys import argv, exit
 
+"""This is main file to run the application and create basic directory structure
+context.py      : contains main positioning logic
+settings.py     : translation methods (plain text for now - future db)
+test.py         : testing an application
+ui_streamlit.py : application web interface 
+visual.py       : graphs and charts
+"""
+
 def create_dir(location):
     try:
         Path(location).mkdir(parents=True, exist_ok=False)
@@ -10,6 +18,7 @@ def create_dir(location):
         print(f"Folder {location} is already present")
     else:
         print(f"Folder {location} was created")
+
 
 def download_file(location, file_name=""):
     # https://stackoverflow.com/questions/11768214/python-download-a-file-from-an-ftp-server
@@ -23,6 +32,7 @@ def download_file(location, file_name=""):
         with open(f"./{location}/{file_name}", "wb") as f:
             shutil.copyfileobj(r, f)
     print(f"SPK file ./{location}/{file_name} downloaded ....")
+
 
 def get_source_file(location: str = "source", file_name="de430.bsp"):
     if Path(f"./{location}/{file_name}").is_file():
