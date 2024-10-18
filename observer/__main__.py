@@ -11,6 +11,7 @@ ui_streamlit.py : application web interface
 visual.py       : graphs and charts
 """
 
+
 def create_dir(location):
     try:
         Path(location).mkdir(parents=True, exist_ok=False)
@@ -51,11 +52,12 @@ if __name__ == "__main__":
     if args.t:
         # from streamlit import cli as stcli
         try:
-            from streamlit.web import cli as stcli    
+            from streamlit.web import cli as stcli
+
             argv = ["streamlit", "run", "./observer/ui_streamlit.py"]
             exit(stcli.main())
         except ImportError:
             import ui_streamlit as st
+
             print("What?")
             st.main()
-            

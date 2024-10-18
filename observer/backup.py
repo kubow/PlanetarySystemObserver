@@ -1,4 +1,3 @@
-from context import Actual
 from datetime import datetime, time, date, timedelta
 from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
@@ -11,6 +10,7 @@ from geopy.geocoders import Nominatim
 from geopy.location import Location
 import pytz
 from timezonefinder import TimezoneFinder
+
 
 # plt.rcParams["figure.figsize"] = (16, 6) # (w, h)
 
@@ -187,17 +187,15 @@ class Almanac(Observation):
         o_o = {}
         for index in range(len(self.observed[0])):
             evt_time = self.observed[0][index].utc_strftime()
-            o_o [evt_time] = self.almanac[self.observed[-1][index]]
+            o_o[evt_time] = self.almanac[self.observed[-1][index]]
         return o_o
 
     def span(self, days, start, end):
-        start.add_some_time((-1)*days/2)
+        start.add_some_time((-1) * days / 2)
         start.assign_time_zone()
-        end.add_some_time(days/2)
+        end.add_some_time(days / 2)
         end.assign_time_zone()
         return self.ts.from_datetime(start.value), self.ts.from_datetime(end.value)
-
-
 
 
 def frequency(day=0, hour=0, minute=0):
