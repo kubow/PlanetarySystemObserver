@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import pandas as pd
+import pydeck as pdk
 from skyfield.api import load, Topos, utc
 from skyfield import timelib
 import sqlite3
@@ -21,7 +22,7 @@ class Master:
             "scale": load.timescale(),
             "from": 0,
             "to": 0,
-            "gran": 0,
+            "gran": '',
             "format": date_format,
             "frame": None  # this will hold pandas time frame
         }
@@ -54,7 +55,7 @@ class Master:
         else:
             print("not known method...")
 
-    def frame_prepare(self):
+    def frame_prepare(self) -> pd.DataFrame:
         df = pd.DataFrame(
             pd.date_range(
                 self.time["from"], self.time["to"],
@@ -108,7 +109,7 @@ class Computation:
             self.centerpoint = self.c + Topos(f'{x} N', f'{y} E')
 
 
-def planets_df():
+def planets_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
             "planet": ["moon", "mercury", "venus", "mars", "jupiter", "saturn", "uran", "neptune", "pluto"],
@@ -117,7 +118,19 @@ def planets_df():
     )
 
 
-def frequency(day: object = 0, hour: object = 0, minute: object = 0) -> object:
+def loc_df(lat: int, lon: int) -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            'latitude': [lat, ],
+            'longitude': [lon, ],
+            'color': ['#0044ff', ],
+            'size': [10]
+        },
+        index=[1, ]
+    )
+
+
+def frequency(day: object = 0, hour: object = 0, minute: object = 0) -> str:
     if minute:
         return f'{minute}min'
     elif hour:

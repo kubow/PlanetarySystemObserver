@@ -1,7 +1,6 @@
-from actual import now
-from context import Master, planets_df
+from context import Master, now, loc_df, planets_df
 # from current import Observation, Almanac
-# from display import figure_3d
+# from visual import figure_3d
 # from project import Subject
 import streamlit as st
 from settings import change_language
@@ -10,7 +9,7 @@ from settings import change_language
 def main():
     # 1 - initial setting
     lang = change_language(default="cz")
-
+    current_time = now()
     # 2 - set page layout
     st.set_page_config(
         page_title="Astro visualization application",
@@ -28,11 +27,12 @@ def main():
         with st.expander(lang["position"]):
             latitude = st.number_input(lang["latitude"], min_value=float(-90), max_value=float(90), value=50.08804)
             longitude = st.number_input(lang["longitude"], min_value=float(-180), max_value=float(180), value=14.42076)
-            # TODO: place picker
+            st.map(loc_df(lat=latitude, lon=longitude), color='color')
+            # TODO: place picker in editable mode
     with sidebar_cont["timespan"]:
         with st.expander(lang["timespan"]):
-            date1 = st.date_input(lang["date_from"], value=now())
-            date2 = st.date_input(lang["date_to"], value=now())
+            date1 = st.date_input(lang["date_from"], value=current_time)
+            date2 = st.date_input(lang["date_to"], value=current_time)
             # TODO: granularity
     with sidebar_cont["confirm"]:
         with st.form(key="confirmation"):
@@ -56,7 +56,7 @@ def main():
         observer.move_head_location(int(latitude), int(longitude))
         selected = observe[observe['selected'] == True]['planet'].tolist()
         observer.move_head_direction(*selected)
-        observer.frame_the_time() # relative to now before to deconstruct the actual input
+        observer.frame_the_time()  # relative to now before to deconstruct the actual input
         st.dataframe(observer.time["frame"])
         st.line_chart(observer.time["frame"], x="date_time")
     else:
