@@ -1,8 +1,8 @@
 
 [theme]
-primaryColor="GREEN"
-backgroundColor="#800d26"
+primaryColor = "#f63366"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#f0f2f6"
+textColor = "#262730"
 titleColor="WHITE"
-secondaryBackgroundColor="#262730"
-textColor="##a20ccc"
 font="sans serif"
