@@ -12,8 +12,8 @@ def main():
     current_time = now()
     # 2 - set page layout
     st.set_page_config(
-        page_title="Astro visualization application",
-        page_icon="✨",
+        page_title="Astro Info",
+        page_icon="✨☀️",
         layout="wide",
         initial_sidebar_state="expanded",
     )
@@ -50,9 +50,14 @@ def main():
             )
             compute = st.form_submit_button(lang["run"])
 
+    
+    # Prepare main object for position display
+    observer = Master()
+    # Place it to default coordinates
+    observer.move_head_location(int(latitude), int(longitude))
     # 3 - act if any button pressed
     if compute:
-        observer = Master()
+        # refresh place according to the dialog
         observer.move_head_location(int(latitude), int(longitude))
         selected = observe[observe['selected'] == True]['planet'].tolist()
         observer.move_head_direction(*selected)
@@ -60,8 +65,29 @@ def main():
         st.dataframe(observer.time["frame"])
         st.line_chart(observer.time["frame"], x="date_time")
     else:
-        st.write(f"{lang['longitude']}: {latitude} / {lang['latitude']}: {longitude}")
-
+        st.info(f"{lang['date_actual']}: {current_time} --- {lang['longitude']}: {latitude} / {lang['latitude']}: {longitude}")
+        st.markdown("---")
+        
+        col1, col2 = st.columns([1, 2]) # ratios
+        with col1:
+            st.image("./image/sun4.png")
+        with col2:
+            st.markdown("# [Sun example](https://svs.gsfc.nasa.gov/5048)")
+            st.markdown("- Distance:")
+            st.markdown("- Ra/Dec")
+            st.markdown("- Lon/lat")
+            st.markdown("- Angle")
+        col3, col4 = st.columns([1, 2]) # ratios
+        with col3:
+            st.image("./image/sun1.png")
+        with col4:
+            st.markdown("# [Moon example](https://svs.gsfc.nasa.gov/5048)")
+            st.markdown("- Phase")
+            st.markdown("- Distance")
+            st.markdown("- Ra/Dec")
+            st.markdown("- Lon/lat")
+            st.markdown("- Angle")
+        
 
 if __name__ == "__main__":
     main()

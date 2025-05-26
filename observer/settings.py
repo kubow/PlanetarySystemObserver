@@ -7,6 +7,7 @@ def change_language(default: str = "cz") -> dict:
             "control": "confirm",
             "latitude": "latitude",
             "longitude": "longitude",
+            "date_actual": "current time",
             "date_from": "start time",
             "date_to": "end time",
             "run": "run calculation"
@@ -18,6 +19,7 @@ def change_language(default: str = "cz") -> dict:
             "control": "bestätigen",
             "latitude": "Breitengrad",
             "longitude": "Längengrad",
+            "date_actual": "Aktualzeit",
             "date_from": "Startzeit",
             "date_to": "Endzeit",
             "run": "Berechnung ausführen"
@@ -29,6 +31,7 @@ def change_language(default: str = "cz") -> dict:
             "control": "confirmar",
             "latitude": "latitud",
             "longitude": "longitud",
+            "date_actual": "hora de actual",
             "date_from": "hora de inicio",
             "date_to": "hora de fin",
             "run": "ejecutar cálculo"
@@ -40,6 +43,7 @@ def change_language(default: str = "cz") -> dict:
             "control": "confirmer",
             "latitude": "latitude",
             "longitude": "longitude",
+            "date_actual": "heure aktuel",
             "date_from": "heure de début",
             "date_to": "heure de fin",
             "run": "lancer le calcul"
@@ -51,6 +55,7 @@ def change_language(default: str = "cz") -> dict:
             "control": "potvrdit",
             "latitude": "zeměpisná šířka",
             "longitude": "zeměpisná délka",
+            "date_actual": "aktuální čas",
             "date_from": "počátěční čas",
             "date_to": "koncový čas",
             "run": "spustit výpočet"
