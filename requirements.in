@@ -1,0 +1,4 @@
+pandas>=2.2.3
+pip-tools>=7.4.1
+skyfield>=1.49
+streamlit>=1.42.0
