@@ -1,0 +1,18 @@
+fun_projects/astro.md
+  h_0907ec034f4a17 1-132
+observer/moon.py
+  h_0907ec034f4a17 1-43
+sources.md
+  h_0907ec034f4a17 5-16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8d263a8c3e9c463899f0850a5466a5e2890ae20c",
+  "prompts": {},
+  "humans": {
+    "h_0907ec034f4a17": {
+      "author": "kubow <kube.kubow@gmail.com>"
+    }
+  }
+}
